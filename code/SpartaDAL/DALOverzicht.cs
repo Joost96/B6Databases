@@ -87,19 +87,30 @@ namespace Sparta.Dal
             conn.Close();
             return curussen;
         }
+
+        /**
+         * @Juan Albergen
+         * Program: Opvragen van Persoon tabel in Database en doorsturen naar applicatie
+         **/
+         
         public static List<Persoon> GetPersonen()
         {
+            //Initialiseren van een DB connectie
             SqlConnection connection = DALConnection.GetConnectionByName("Reader");
             connection.Open();
 
+            //Opzetten query
             string infoPersoon = "SELECT PersoonId, Naam, Achternaam, Categorie, GeboorteDatum" +
                                  " FROM Persoon";
 
+            
             SqlCommand command = new SqlCommand(infoPersoon, connection);
             SqlDataReader reader = command.ExecuteReader();
 
-            List<Persoon> list = new List<Persoon>();
+            //Aanmaken van een lijst waarin de gegevens worden gestored.
+            List<Persoon> listpersoon = new List<Persoon>();
 
+            //Het vullen van de lijst.
             while (reader.Read())
             {
                 int PersoonId = reader.GetInt32(0);
@@ -109,11 +120,11 @@ namespace Sparta.Dal
                 DateTime GeboorteDatum = reader.GetDateTime(4);
 
                 Persoon pers = new Persoon(PersoonId, Naam, Achternaam, GeboorteDatum, Categorie);
-                list.Add(pers);
+                listpersoon.Add(pers);
             }
 
             connection.Close();
-            return list;
+            return listpersoon;
         }
 
     }
