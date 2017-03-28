@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DALConnection..cs" />
+    <Compile Include="DALOverzicht.cs" />
     <Compile Include="DALProgramma.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
