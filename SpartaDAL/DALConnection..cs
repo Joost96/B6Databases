@@ -12,6 +12,7 @@ namespace Sparta.Dal
     {
         public static SqlConnection GetConnectionByName(string naam)
         {
+            //haalt connection string op uit het configuratie bestand en maakt er een sqlConnection van
             string conString = ConfigurationManager.ConnectionStrings[naam].ConnectionString;
             return new SqlConnection(conString);
         }
