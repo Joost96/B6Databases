@@ -87,6 +87,34 @@ namespace Sparta.Dal
             conn.Close();
             return curussen;
         }
+        public static List<Persoon> GetPersonen()
+        {
+            SqlConnection connection = DALConnection.GetConnectionByName("Reader");
+            connection.Open();
+
+            string infoPersoon = "SELECT PersoonId, Naam, Achternaam, Categorie, GeboorteDatum" +
+                                 " FROM Persoon";
+
+            SqlCommand command = new SqlCommand(infoPersoon, connection);
+            SqlDataReader reader = command.ExecuteReader();
+
+            List<Persoon> list = new List<Persoon>();
+
+            while (reader.Read())
+            {
+                int PersoonId = reader.GetInt32(0);
+                string Naam = reader.GetString(1);
+                string Achternaam = reader.GetString(2);
+                DeelnemerCategorie Categorie = (DeelnemerCategorie)reader.GetInt16(3);
+                DateTime GeboorteDatum = reader.GetDateTime(4);
+
+                Persoon pers = new Persoon(PersoonId, Naam, Achternaam, GeboorteDatum, Categorie);
+                list.Add(pers);
+            }
+
+            connection.Close();
+            return list;
+        }
 
     }
 }
