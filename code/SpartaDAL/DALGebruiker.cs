@@ -253,14 +253,121 @@ namespace Sparta.Dal
             return loginid;
         }
 
+
+        // Door: Juan Albergen
         public static void voegtoeContactInfo(Contact info)
         {
+            //Initialiseren van een DB connectie
+            SqlConnection connection = DALConnection.GetConnectionByName("Writer");
+            connection.Open();
 
+            //Preparen van query
+            SqlParameter contactInfoldParam = new SqlParameter("@1", SqlDbType.Int);
+            SqlParameter persoonIdParam = new SqlParameter("@2", SqlDbType.Int);
+            SqlParameter straatParam = new SqlParameter("@3", SqlDbType.NVarChar, 50);
+            SqlParameter huisnummerParam = new SqlParameter("@4", SqlDbType.Int);
+            SqlParameter huisnummertoevoegingParam = new SqlParameter("@5", SqlDbType.NVarChar, 10);
+            SqlParameter plaatsParam = new SqlParameter("@6", SqlDbType.NVarChar, 50);
+            SqlParameter postcodeParam = new SqlParameter("@7", SqlDbType.NChar, 6);
+            SqlParameter emailParam = new SqlParameter("@8", SqlDbType.NVarChar, 50);
+            SqlParameter telefoonParam = new SqlParameter("@9", SqlDbType.NVarChar, 20);
+
+            //Opzetten query
+            string sqlContactInfo = "INSERT INTO ContactInfo (PersoonId, Straat, Huisnummer, Huisnummertoevoeging, Plaats, Postcode, Email, Telefoon)" +
+                                    " VALUES (@2, @3, @4, @5, @6, @7, @8, @9);";
+
+            SqlCommand command = new SqlCommand(sqlContactInfo, connection);
+
+            command.Parameters.Add(contactInfoldParam);
+            command.Parameters.Add(persoonIdParam);
+            command.Parameters.Add(straatParam);
+            command.Parameters.Add(huisnummerParam);
+            command.Parameters.Add(huisnummertoevoegingParam);
+            command.Parameters.Add(plaatsParam);
+            command.Parameters.Add(postcodeParam);
+            command.Parameters.Add(emailParam);
+            command.Parameters.Add(telefoonParam);
+
+            contactInfoldParam.Value = info.Id;
+            persoonIdParam.Value = info.Persoonid;
+            straatParam.Value = info.Straat;
+            huisnummerParam.Value = info.Huisnummer;
+            huisnummertoevoegingParam.Value = info.Huisnummertoevoeging;
+            plaatsParam.Value = info.Plaats;
+            postcodeParam.Value = info.Postcode;
+            emailParam.Value = info.Email;
+            telefoonParam.Value = info.Telefoon;
+
+            command.Prepare();
+            command.ExecuteNonQuery();
+
+            connection.Close();
         }
+
+
+        // Door: Juan Albergen
 
         public static void vernieuwContactInfo(Contact info)
         {
 
+            //Initialiseren van een DB connectie
+            SqlConnection connection = DALConnection.GetConnectionByName("Writer");
+            connection.Open();
+
+            //Preparen van query
+            SqlParameter contactInfoldParam = new SqlParameter("@1", SqlDbType.Int);
+            SqlParameter persoonIdParam = new SqlParameter("@2", SqlDbType.Int);
+            SqlParameter straatParam = new SqlParameter("@3", SqlDbType.NVarChar, 50);
+            SqlParameter huisnummerParam = new SqlParameter("@4", SqlDbType.Int);
+            SqlParameter huisnummertoevoegingParam = new SqlParameter("@5", SqlDbType.NVarChar, 10);
+            SqlParameter plaatsParam = new SqlParameter("@6", SqlDbType.NVarChar, 50);
+            SqlParameter postcodeParam = new SqlParameter("@7", SqlDbType.NChar, 6);
+            SqlParameter emailParam = new SqlParameter("@8", SqlDbType.NVarChar, 50);
+            SqlParameter telefoonParam = new SqlParameter("@9", SqlDbType.NVarChar, 20);
+
+            //Opzetten query
+            string sqlContactInfo = "UPDATE ContactInfo" +
+                                    " SET ContactInfold = @1 PersoonId = @2, Straat = @3, Huisnummer = @4 , Huisnummertoevoeging = @5, Plaats = @6, Postcode = @7, Email = @8, Telefoon = @9" +
+                                    " WHERE PersoonId =  10";
+
+
+
+            SqlCommand command = new SqlCommand(sqlContactInfo, connection);
+
+            contactInfoldParam.Value = info.Id;
+            persoonIdParam.Value = info.Persoonid;
+            straatParam.Value = info.Straat;
+            huisnummerParam.Value = info.Huisnummer;
+            huisnummertoevoegingParam.Value = info.Huisnummertoevoeging;
+            plaatsParam.Value = info.Plaats;
+            postcodeParam.Value = info.Postcode;
+            emailParam.Value = info.Email;
+            telefoonParam.Value = info.Telefoon;
+
+            command.Parameters.Add(contactInfoldParam);
+            command.Parameters.Add(persoonIdParam);
+            command.Parameters.Add(straatParam);
+            command.Parameters.Add(huisnummerParam);
+            command.Parameters.Add(huisnummertoevoegingParam);
+            command.Parameters.Add(plaatsParam);
+            command.Parameters.Add(postcodeParam);
+            command.Parameters.Add(emailParam);
+            command.Parameters.Add(telefoonParam);
+
+            command.Prepare();
+            command.ExecuteNonQuery();
+
+            connection.Close();
+
+        }
+
+        //Dit is een dummy methode, er onstond een error die vroeg naar deze methode in de logic laag. Bestond niet. Door deze methode hebben we het wel kunnnen testen. 
+        //Er wordt dus ook gebruik gemaakt van een PersoonId die niet veranderd.
+        public static Contact GetContactInfoByPersoonId(Int32 persoonid)
+        {
+            Contact c = new Contact();
+            c.Persoonid = 10;
+            return c;
         }
     }
 }
