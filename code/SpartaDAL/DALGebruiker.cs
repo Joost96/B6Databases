@@ -12,8 +12,8 @@ namespace Sparta.Dal
     public static class DALGebruiker
     {
         /**
-         * door Joost
-         * het controlleren van credentials met de persoon als return value
+        * door Joost
+        * het controlleren van credentials met de persoon als return value
         **/
         public static Persoon checkCredentials(Login user)
         {
@@ -39,10 +39,11 @@ namespace Sparta.Dal
                 int persoonId = reader.GetInt32(0);
                 string naam = reader.GetString(1);
                 string achternaam = reader.GetString(2);
-                DeelnemerCategorie categorie = (DeelnemerCategorie) reader.GetInt16(3);
+                DeelnemerCategorie categorie = (DeelnemerCategorie)reader.GetInt16(3);
                 DateTime gebDatum = reader.GetDateTime(4);
                 persoon = new Persoon(persoonId, naam, achternaam, gebDatum, categorie);
-            } else
+            }
+            else
             {
                 throw new Exception("Persoon not found");
             }
@@ -60,7 +61,7 @@ namespace Sparta.Dal
             //open connection
             SqlConnection conn = DALConnection.GetConnectionByName("Reader");
             conn.Open();
-            
+
             //set up sql query
             string sql = "SELECT PersoonId FROM dbo.Login " +
                 "WHERE AanmeldNaam = @naam AND pwdhash = @pwd";
@@ -80,10 +81,11 @@ namespace Sparta.Dal
             sqlcmd.Prepare();
 
             SqlDataReader reader = sqlcmd.ExecuteReader();
-            if(reader.Read())
+            if (reader.Read())
             {
                 id = reader.GetInt32(0);
-            } else
+            }
+            else
             {
                 throw new Exception("Login not found");
             }
@@ -93,12 +95,20 @@ namespace Sparta.Dal
             return id;
         }
 
+        /**
+         * door Joost
+         * registreren van persoon
+        **/
         public static void RegistreerPersoon(DeelnemerCategorie categorie,
-            string naam, string achternaam,DateTime gebdatum, Login aanmeld)
+            string naam, string achternaam, DateTime gebdatum, Login aanmeld)
         {
             int persoonId = voegPersoonToe(categorie, naam, achternaam, gebdatum);
             voegLoginToe(persoonId, aanmeld);
         }
+        /**
+         * door Joost
+         * toe voegen van persoon
+        **/
         private static int voegPersoonToe(DeelnemerCategorie categorie,
             string naam, string achternaam, DateTime gebdatum)
         {
@@ -106,18 +116,67 @@ namespace Sparta.Dal
             SqlConnection conn = DALConnection.GetConnectionByName("Reader");
             conn.Open();
 
-            string sql = "INSERT INTO dbo.Persoon " + 
-                "(Naam, Achternaam, Categorie, GeboorteDatum) VALUES" + 
-                "(@naam, @achternaam, @categorie, @GeboorteDatum)";
+            string sql = "INSERT INTO dbo.Persoon " +
+                "(Naam, Achternaam, Categorie, GeboorteDatum) output INSERTED.PersoonId VALUES" +
+                "(@naam, @achternaam, @categorie, @geboorteDatum); ";
             SqlCommand sqlcmd = new SqlCommand(sql, conn);
+            //maken parameters
+            SqlParameter naamParam = new SqlParameter("@naam", SqlDbType.NVarChar, 50);
+            SqlParameter achternaamParam = new SqlParameter("@achternaam", SqlDbType.NVarChar, 50);
+            SqlParameter categorieParam = new SqlParameter("@categorie", SqlDbType.SmallInt);
+            SqlParameter geboorteDatumParam = new SqlParameter("@geboorteDatum", SqlDbType.Date);
 
-            //reader.Close();
+            //waarde geven aan parameters
+            naamParam.Value = naam;
+            achternaamParam.Value = achternaam;
+            categorieParam.Value = (Int16)categorie;
+            geboorteDatumParam.Value = gebdatum;
+
+            //parameters toevoegen
+            sqlcmd.Parameters.Add(naamParam);
+            sqlcmd.Parameters.Add(achternaamParam);
+            sqlcmd.Parameters.Add(categorieParam);
+            sqlcmd.Parameters.Add(geboorteDatumParam);
+            sqlcmd.Prepare();
+            id = (int)sqlcmd.ExecuteScalar();
+
             conn.Close();
             return id;
         }
-        private static void voegLoginToe(int persoonId ,Login aanmeld)
+        /**
+         * door Joost
+         * toe voegen van login
+        **/
+        private static void voegLoginToe(int persoonId, Login aanmeld)
         {
+            //open connection
+            SqlConnection conn = DALConnection.GetConnectionByName("Reader");
+            conn.Open();
 
+            //sql query
+            string sql = "INSERT INTO dbo.Login (AanmeldNaam, PwdHash, PersoonId) " +
+                "VALUES(@naam, @pwd, @pId)";
+            SqlCommand sqlcmd = new SqlCommand(sql, conn);
+
+            //maken parameters
+            SqlParameter naamParam = new SqlParameter("@naam", SqlDbType.NVarChar, 50);
+            SqlParameter pwdParam = new SqlParameter("@pwd", SqlDbType.NChar, 32);
+            SqlParameter pIdParam = new SqlParameter("@pId", SqlDbType.Int);
+
+            //waarde geven aan parameters
+            naamParam.Value = aanmeld.Naam;
+            pwdParam.Value = aanmeld.Pwdhash;
+            pIdParam.Value = persoonId;
+
+            //parameters toevoegen
+            sqlcmd.Parameters.Add(naamParam);
+            sqlcmd.Parameters.Add(pwdParam);
+            sqlcmd.Parameters.Add(pIdParam);
+            sqlcmd.Prepare();
+
+            sqlcmd.ExecuteNonQuery();
+
+            conn.Close();
         }
 
         // Door: Davut Demir
