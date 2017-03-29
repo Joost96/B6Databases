@@ -96,12 +96,41 @@ namespace Sparta.Dal
         public static void RegistreerPersoon(DeelnemerCategorie categorie,
             string naam, string achternaam,DateTime gebdatum, Login aanmeld)
         {
+            int persoonId = voegPersoonToe(categorie, naam, achternaam, gebdatum);
+            voegLoginToe(persoonId, aanmeld);
+        }
+        private static int voegPersoonToe(DeelnemerCategorie categorie,
+            string naam, string achternaam, DateTime gebdatum)
+        {
+            int id = 0;
+            SqlConnection conn = DALConnection.GetConnectionByName("Reader");
+            conn.Open();
+
+            string sql = "INSERT INTO dbo.Persoon " + 
+                "(Naam, Achternaam, Categorie, GeboorteDatum) VALUES" + 
+                "(@naam, @achternaam, @categorie, @GeboorteDatum)";
+            SqlCommand sqlcmd = new SqlCommand(sql, conn);
+
+            //reader.Close();
+            conn.Close();
+            return id;
+        }
+        private static void voegLoginToe(int persoonId ,Login aanmeld)
+        {
 
         }
 
         public static void UpdatePwd(int loginid, string pwdhash)
         {
+            string updateQuery = "UPDATE dbo.Login SET PwdHash = " + pwdhash + " WHERE LoginId = " + loginid;
+            SqlConnection sqlConn = DALConnection.GetConnectionByName("Writer");
+            sqlConn.Open();
+            SqlCommand sqlCmnd = new SqlCommand(updateQuery, sqlConn);
+            sqlCmnd.Prepare();
 
+            sqlCmnd.ExecuteNonQuery();
+
+            sqlConn.Close();
         }
 
         public static int GetLoginId(int persoonid, string pwdhash)
