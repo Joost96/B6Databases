@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SpartaModel">
-      <HintPath>..\Applicatie\SpartaModel.dll</HintPath>
+      <HintPath>..\..\..\..\..\Documents\Visual Studio 2017\Projects\SpartaDAL\SpartaUI\SpartaModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

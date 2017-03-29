@@ -120,22 +120,78 @@ namespace Sparta.Dal
 
         }
 
+        // Door: Davut Demir
+        // Update de password van een gebruiker
         public static void UpdatePwd(int loginid, string pwdhash)
         {
-            string updateQuery = "UPDATE dbo.Login SET PwdHash = " + pwdhash + " WHERE LoginId = " + loginid;
+            // opent een writer connection met de database
             SqlConnection sqlConn = DALConnection.GetConnectionByName("Writer");
             sqlConn.Open();
+
+            // de query die de password van de gebruiker update
+            string updateQuery = "UPDATE dbo.Login SET PwdHash = @hash WHERE LoginId = @id";
+
+            // zet de query klaar voor gebruik
             SqlCommand sqlCmnd = new SqlCommand(updateQuery, sqlConn);
+
+            // leggen de informatie van de loginId en de nieuwe password hash in de query
+            // met gebruik van parameters
+            SqlParameter paramHash = new SqlParameter("@hash", SqlDbType.NVarChar, 32);
+            SqlParameter paramId = new SqlParameter("@id", SqlDbType.Int);
+
+            // hier wordt de parameters gevult met informatie
+            paramHash.Value = pwdhash;
+            paramId.Value = loginid;
+
+            // hier worden de parameters toegevoegd
+            sqlCmnd.Parameters.Add(paramHash);
+            sqlCmnd.Parameters.Add(paramId);
             sqlCmnd.Prepare();
 
+            // hier wordt de query uitgevoerd op de database
             sqlCmnd.ExecuteNonQuery();
 
             sqlConn.Close();
         }
 
+
+        // Door: Davut Demir
+        // haalt de loginId van de database en returnt deze value
         public static int GetLoginId(int persoonid, string pwdhash)
         {
-            return 0;
+            // opent een reader connection met de database
+            SqlConnection sqlConn = DALConnection.GetConnectionByName("Reader");
+            sqlConn.Open();
+
+            // de query die de informatie vind van de LoginId
+            string selectQuery = "SELECT LoginId FROM dbo.Login WHERE PersoonId = @id AND PwdHash = @hash";
+
+            // zet de query klaar voor gebruik
+            SqlCommand sqlCmnd = new SqlCommand(selectQuery, sqlConn);
+
+            // leggen de informatie van de PersoonId en de password hash in de query
+            // met gebruik van parameters
+            SqlParameter paramId = new SqlParameter("@id", SqlDbType.Int);
+            SqlParameter paramHash = new SqlParameter("@hash", SqlDbType.NVarChar, 32);
+
+            // hier wordt de parameters gevult met informatie
+            paramHash.Value = pwdhash;
+            paramId.Value = persoonid;
+
+            // hier worden de parameters toegevoegd
+            sqlCmnd.Parameters.Add(paramId);
+            sqlCmnd.Parameters.Add(paramHash);
+            sqlCmnd.Prepare();
+
+            // hier wordt de query uitgevoerd op de database
+            SqlDataReader dataReader = sqlCmnd.ExecuteReader();
+
+            // we lezen 1 lijn, waar de informatie staat over de LoginId, en daarna slaan we deze op in een variabel.
+            dataReader.Read();
+            int loginid = dataReader.GetInt32(0);
+            sqlConn.Close();
+
+            return loginid;
         }
 
         public static void voegtoeContactInfo(Contact info)
