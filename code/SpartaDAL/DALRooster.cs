@@ -17,7 +17,7 @@ namespace Sparta.Dal
         public static List<RoosterDag> GetRoosterInfo()
         {
             List<RoosterInfo> infoLijst = GetRooster();
-            return null;
+            return Transformeer(infoLijst);
         }
         /**
          * door Joost en Davut
@@ -25,7 +25,7 @@ namespace Sparta.Dal
         public static List<RoosterDag> GetRoosterInfo(int persoonid)
         {
             List<RoosterInfo> infoLijst = GetRooster(persoonid);
-            return null;
+            return Transformeer(infoLijst);
         }
 
         /**
@@ -54,7 +54,7 @@ namespace Sparta.Dal
                 int locatieId = reader.GetInt32(3);
                 Cursus cursus = GetCursusById(cursusId);
                 Locatie locatie = GetLocatieById(locatieId);
-                RoosterInfo info = new RoosterInfo(dagId,blokId,locatie,cursus);
+                RoosterInfo info = new RoosterInfo(dagId, blokId, locatie, cursus);
             }
             reader.Close();
             conn.Close();
@@ -144,14 +144,14 @@ namespace Sparta.Dal
             conn.Open();
 
             //sql query klaarzetten
-            string sql = "SELECT Gebouw, Zaal, Omschrijving FROM dbo.Locatie " + 
+            string sql = "SELECT Gebouw, Zaal, Omschrijving FROM dbo.Locatie " +
                 "WHERE LocatieId = @id";
             SqlCommand sqlcmd = new SqlCommand(sql, conn);
 
             SqlParameter idParam = new SqlParameter("@id", SqlDbType.Int);
             idParam.Value = locatieId;
             sqlcmd.Parameters.Add(idParam);
-            sqlcmd.Prepare();            
+            sqlcmd.Prepare();
 
             //query uitvoeren en resultaat lezen
             SqlDataReader reader = sqlcmd.ExecuteReader();
@@ -168,6 +168,29 @@ namespace Sparta.Dal
             conn.Close();
 
             return locatie;
+        }
+
+
+        private static List<RoosterDag> Transformeer(List<RoosterInfo> infoLijst)
+        {
+            List<RoosterDag> roosterDag = new List<RoosterDag>();
+
+
+            for (int i = 0; i <= 6; i++)
+            {
+                roosterDag.Add(new RoosterDag(i + 1, new List<RoosterBlok>()));
+                for (int j = 1; j <= 7; j++)
+                {
+                    roosterDag[i].Lijst.Add(new RoosterBlok(j, new List<RoosterItem>()));
+                }
+            }
+
+            foreach(RoosterInfo info in infoLijst)
+            {
+                roosterDag[info.Dag].Lijst[info.Blok].Lijst.Add(new RoosterItem(info.Locatie, info.Cursus));
+            }
+
+            return roosterDag;
         }
     }
 }
