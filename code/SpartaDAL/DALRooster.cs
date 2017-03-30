@@ -202,5 +202,113 @@ namespace Sparta.Dal
 
             return roosterDag;
         }
+
+        // Door: Juan Albergen
+        public static List<Inschrijving> GetInschrijvingen(int persoonid)
+        {
+            //Initialiseren van een DB connectie
+            SqlConnection connection = DALConnection.GetConnectionByName("Reader");
+            connection.Open();
+
+            //Preparen van query
+            SqlParameter persoonIdParam = new SqlParameter("@id", SqlDbType.Int);
+
+
+            string sqlOpvragenInschrijving = "SELECT* " +
+                                    "FROM Inschrijving " +
+                                    "WHERE persoonId = @id";
+
+            SqlCommand command = new SqlCommand(sqlOpvragenInschrijving, connection);
+
+            persoonIdParam.Value = persoonid;
+            command.Parameters.Add(persoonIdParam);
+
+            command.Prepare();
+            SqlDataReader reader = command.ExecuteReader();
+
+            //Lijst aanmaken met de inschrijving
+            List<Inschrijving> listInschrijving = new List<Inschrijving>();
+
+            //Vullen van de lijst met de opgevraagde records
+            while (reader.Read())
+            {
+                int inschrijvingId = reader.GetInt32(0);
+                int persoonId = reader.GetInt32(1);
+                int cursusId = reader.GetInt32(2);
+
+                Inschrijving ins = new Inschrijving(persoonId, cursusId);
+                listInschrijving.Add(ins);
+            }
+
+            reader.Close();
+            connection.Close();
+            return listInschrijving;
+
+        }
+
+        //door juan
+        public static void Inschrijven(int persoonid, List<int> cursussen)
+        {
+            //Initialiseren van een DB connectie
+            SqlConnection connection = DALConnection.GetConnectionByName("Writer");
+            connection.Open();
+
+            //Voor elke cursus in de lijst met cursussen
+            foreach (int cursus in cursussen)
+            {
+                //Preparen query en uitvoeren
+                SqlParameter persoonIdParam = new SqlParameter("@persoonid", SqlDbType.Int);
+                SqlParameter cursusIdParam = new SqlParameter("@cursusid", SqlDbType.Int);
+
+                persoonIdParam.Value = persoonid;
+                cursusIdParam.Value = cursus;
+
+                string sqlInschrijven = "INSERT INTO Inschrijving (PersoonId, CursusId) " +
+                                        "VALUES (@persoonid, @cursusid)";
+
+                SqlCommand command = new SqlCommand(sqlInschrijven, connection);
+
+                command.Parameters.Add(persoonIdParam);
+                command.Parameters.Add(cursusIdParam);
+
+                command.Prepare();
+                command.ExecuteNonQuery();
+            }
+
+            connection.Close();
+
+        }
+
+        //door juan
+        public static void Uitschrijven(int persoonid, List<int> cursussen)
+        {
+            //Initialiseren van een DB connectie
+            SqlConnection connection = DALConnection.GetConnectionByName("Writer");
+            connection.Open();
+
+            //Voor elke cursus in de lijst met cursussen
+            foreach (int cursus in cursussen)
+            {
+                //Preparen query
+                SqlParameter persoonIdParam = new SqlParameter("@persoonid", SqlDbType.Int);
+                SqlParameter cursusIdParam = new SqlParameter("@cursusid", SqlDbType.Int);
+
+                persoonIdParam.Value = persoonid;
+                cursusIdParam.Value = cursus;
+
+                string sqlUitschrijven = "DELETE FROM Inschrijving " +
+                                         "WHERE CursusId = @cursusid AND PersoonId = @persoonId";
+
+                SqlCommand command = new SqlCommand(sqlUitschrijven, connection);
+
+                command.Parameters.Add(persoonIdParam);
+                command.Parameters.Add(cursusIdParam);
+
+                command.Prepare();
+                command.ExecuteNonQuery();
+            }
+
+            connection.Close();
+        }
     }
 }
